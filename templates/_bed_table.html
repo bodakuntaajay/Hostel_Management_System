@@ -1,0 +1,31 @@
+<div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bed No.</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Block Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Person Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for bed in beds %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ bed.bed_number }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ bed.room.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ bed.room.block.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ bed.person.name if bed.person else 'N/A' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if bed.is_occupied %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                            {{ 'Filled' if bed.is_occupied else 'Empty' }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if not beds %}
+        <p class="text-center text-gray-500 mt-4">No beds found matching the criteria.</p>
+    {% endif %}

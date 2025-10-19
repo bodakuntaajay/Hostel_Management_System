@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">My Guests</h2>
+
+<!-- Filter Form -->
+
+<div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+    <h3 class="text-xl font-bold text-gray-700 mb-4">Filter Guests</h3>
+    <form action="{{ url_for('guests') }}" method="POST" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <div>
+            <label for="block_filter" class="block text-sm font-semibold text-gray-600 mb-2">Block Name</label>
+            <select id="block_filter" name="block_filter" class="w-full border rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">All Blocks</option>
+                {% for block in blocks %}
+                    <option value="{{ block.name }}">{{ block.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="room_filter" class="block text-sm font-semibold text-gray-600 mb-2">Room Name</label>
+            <select id="room_filter" name="room_filter" class="w-full border rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">All Rooms</option>
+                {% for room in rooms %}
+                    <option value="{{ room.name }}">{{ room.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="month_filter" class="block text-sm font-semibold text-gray-600 mb-2">Leaving Month</label>
+            <input type="text" id="month_filter" name="month_filter" class="w-full border rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 03 for March">
+        </div>
+        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors">Filter Guests</button>
+    </form>
+</div>
+
+<!-- Guests Table -->
+
+<div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+    <h3 class="text-xl font-bold text-gray-700 mb-4">Guest Information</h3>
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aadhar No.</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Block</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bed No.</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joining Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Leaving Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for guest in guests %}
+            <tr class="hover:bg-gray-100 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ guest.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ guest.aadhar }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ guest.bed.room.block.name if guest.bed else 'N/A' }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ guest.bed.room.name if guest.bed else 'N/A' }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ guest.bed.bed_number if guest.bed else 'N/A' }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ guest.joining_date }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {% if guest.leaving_date %}
+                        {{ guest.leaving_date }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    {% if guest.leaving_date %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Left</span>
+                    {% else %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    {% if not guest.leaving_date %}
+                        <form action="{{ url_for('mark_person_left', person_id=guest.id) }}" method="POST">
+                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-2 rounded-lg transition-colors">Mark Left</button>
+                        </form>
+                    {% else %}
+                        <span class="text-gray-400">N/A</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if not guests %}
+        <p class="text-center text-gray-500 mt-4">No guest records found.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sahasra Deluxe Stays - Hostel Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-sky-100 flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="bg-sky-500 shadow-md">
+        <div class="container mx-auto p-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="data:image/png;base64,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"
+                alt="Hostel Logo" class="h-10 w-10 mr-4 rounded-full">
+                <h1 class="text-2xl font-bold text-gray-800">Sahasra Deluxe Stays</h1>
+            </div>
+            <nav class="hidden md:block">
+                <ul class="flex space-x-6 text-gray-600">
+                    <li><a href="{{ url_for('home') }}" class="hover:text-blue-500 transition-colors">Home</a></li>
+                    <li><a href="{{ url_for('build') }}" class="hover:text-blue-500 transition-colors">Build</a></li>
+                    <li><a href="{{ url_for('accommodate') }}" class="hover:text-blue-500 transition-colors">Accommodate Bed</a></li>
+                    <li><a href="{{ url_for('payments') }}" class="hover:text-blue-500 transition-colors">Payments</a></li>
+                    <li><a href="{{ url_for('staff') }}" class="hover:text-blue-500 transition-colors">My Staff</a></li>
+                    <li><a href="{{ url_for('guests') }}" class="hover:text-blue-500 transition-colors">My Guests</a></li>
+                    <li><a href="{{ url_for('profile') }}" class="hover:text-blue-500 transition-colors">My Dashboard</a></li>
+                    <li><a href="{{ url_for('reset_password') }}" class="hover:text-blue-500 transition-colors">Reset Password</a></li>
+                </ul>
+            </nav>
+            <a href="{{ url_for('logout') }}" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-transform transform hover:scale-105">Logout</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto p-4 md:p-8">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4">
+                    {% for category, message in messages %}
+                        <div class="bg-{{ 'red' if category == 'error' else 'green' }}-100 border border-{{ 'red' if category == 'error' else 'green' }}-400 text-{{ 'red' if category == 'error' else 'green' }}-700 px-4 py-3 rounded-lg relative" role="alert">
+                            <span class="block sm:inline">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 py-6 mt-auto">
+        <div class="container mx-auto text-center">
+            <p class="text-sm">Owner: Pavan</p>
+            <p class="text-sm">Contact: 9573531287</p>
+            <p class="text-sm">Email: sahasrapg2025@gmail.com</p>
+        </div>
+    </footer>
+</body>
+</html>

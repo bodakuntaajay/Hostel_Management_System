@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Manage Payments</h2>
+
+<!-- Search and Filter Form -->
+<div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+    <h3 class="text-xl font-bold text-gray-700 mb-4">Search Payments</h3>
+    <form action="{{ url_for('payments') }}" method="POST" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+        <div>
+            <label for="person_name" class="block text-sm font-semibold text-gray-600 mb-2">Person Name</label>
+            <input type="text" id="person_name" name="person_name" class="w-full border rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter name...">
+        </div>
+        <div>
+            <label for="room_name" class="block text-sm font-semibold text-gray-600 mb-2">Room Name</label>
+            <input type="text" id="room_name" name="room_name" class="w-full border rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter room name...">
+        </div>
+        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors">Search</button>
+    </form>
+</div>
+
+<!-- Payments Table -->
+<div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+    <h3 class="text-xl font-bold text-gray-700 mb-4">Payment Status Overview</h3>
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Block</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
+                {% set months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] %}
+                {% for month in months %}
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{{ month }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for person in persons %}
+            <tr class="hover:bg-gray-100 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ person.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ person.bed.room.block.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ person.bed.room.name }}</td>
+                {% for month in months %}
+                     <td class="px-4 py-4 whitespace-nowrap text-sm text-center">
+                        {% set payment_status = (person.payments | selectattr('month', '==', month) | first) %}
+                        {% set status = payment_status.status if payment_status else 'pending' %}
+                        {% set eb_amount = payment_status.eb_amount if payment_status and payment_status.eb_amount else 'N/A' %}
+                        <div class="flex items-center justify-center">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer transition-colors"
+                                onclick="showPaymentModal({{ person.id }}, '{{ month }}', '{{ status }}', {{ eb_amount if eb_amount != 'N/A' else 'null' }})"
+                                style="background-color: {% if status == 'done' %}#D1FAE5; color: #047857;{% else %}#FEE2E2; color: #991B1B;{% endif %}"
+                                title="Click to update">
+                                {{ status.capitalize() }}
+                            </span>
+                        </div>
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if not persons and searched %}
+        <p class="text-center text-gray-500 mt-4">No persons found matching your search criteria.</p>
+    {% endif %}
+</div>
+
+<!-- Modal for Payment Update -->
+<div id="payment-modal" class="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50 hidden">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-sm">
+            <h4 class="text-lg font-bold text-gray-700 mb-4" id="modal-title"></h4>
+            <form id="payment-form">
+                <input type="hidden" id="modal-person-id" name="person_id">
+                <input type="hidden" id="modal-month" name="month">
+
+                <div class="mb-4">
+                    <label for="modal-status" class="block text-gray-700 font-semibold mb-2">Payment Status</label>
+                    <select id="modal-status" name="status" class="w-full border rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="pending">Pending</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="modal-eb-amount" class="block text-gray-700 font-semibold mb-2">EB Amount (optional)</label>
+                    <input type="number" id="modal-eb-amount" name="eb_amount" class="w-full border rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closePaymentModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors">Cancel</button>
+                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('payment-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalPersonId = document.getElementById('modal-person-id');
+    const modalMonth = document.getElementById('modal-month');
+    const modalStatus = document.getElementById('modal-status');
+    const modalEbAmount = document.getElementById('modal-eb-amount');
+
+    function showPaymentModal(personId, month, status, ebAmount) {
+        modalTitle.textContent = `Update Payment for ${month}`;
+        modalPersonId.value = personId;
+        modalMonth.value = month;
+        modalStatus.value = status;
+        modalEbAmount.value = ebAmount !== 'N/A' ? ebAmount : '';
+        modal.classList.remove('hidden');
+    }
+
+    function closePaymentModal() {
+        modal.classList.add('hidden');
+    }
+
+    document.getElementById('payment-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const personId = modalPersonId.value;
+        const month = modalMonth.value;
+        const status = modalStatus.value;
+        const ebAmount = modalEbAmount.value;
+
+        const data = {
+            status: status,
+            eb_amount: ebAmount
+        };
+
+        const response = await fetch(`/update_payment/${personId}/${month}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+            closePaymentModal();
+            location.reload();
+        } else {
+            console.error('Failed to update payment status.');
+        }
+    });
+</script>
+{% endblock %}

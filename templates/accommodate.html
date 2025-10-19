@@ -1,0 +1,108 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Accommodate Beds</h2>
+
+<!-- Filter Form -->
+<div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+    <h3 class="text-xl font-bold text-gray-700 mb-4">Filter Beds</h3>
+    <form id="filter-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <div>
+            <label for="block_filter" class="block text-sm font-semibold text-gray-600 mb-2">Block Name</label>
+            <select id="block_filter" name="block_filter" class="w-full border rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">All Blocks</option>
+                {% for block in blocks %}
+                    <option value="{{ block.id }}">{{ block.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="room_filter" class="block text-sm font-semibold text-gray-600 mb-2">Room Name</label>
+            <select id="room_filter" name="room_filter" class="w-full border rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">All Rooms</option>
+                {% for room in rooms %}
+                    <option value="{{ room.id }}">{{ room.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="occupied_status" class="block text-sm font-semibold text-gray-600 mb-2">Status</label>
+            <select id="occupied_status" name="occupied_status" class="w-full border rounded-lg py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">All</option>
+                <option value="filled">Filled</option>
+                <option value="empty">Empty</option>
+            </select>
+        </div>
+        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors">Filter Beds</button>
+    </form>
+</div>
+
+<!-- Filtered Beds Table -->
+<div class="bg-white p-6 rounded-xl shadow-lg">
+    <h3 class="text-xl font-bold text-gray-700 mb-4">Available & Occupied Beds</h3>
+    <div id="bed-table-container">
+        <!-- The table will be loaded here via JavaScript -->
+        {% include '_bed_table.html' %}
+    </div>
+</div>
+
+<!-- Partial table template for dynamic updates -->
+<template id="bed-table-template">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bed No.</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Block Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Person Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for bed in beds %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ bed.bed_number }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ bed.room.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ bed.room.block.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ bed.person.name if bed.person else 'N/A' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if bed.is_occupied %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                            {{ 'Filled' if bed.is_occupied else 'Empty' }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if not beds %}
+        <p class="text-center text-gray-500 mt-4">No beds found matching the criteria.</p>
+    {% endif %}
+</template>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('filter-form');
+        const tableContainer = document.getElementById('bed-table-container');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            const response = await fetch('{{ url_for("filter_accommodate") }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const html = await response.text();
+                tableContainer.innerHTML = html;
+            } else {
+                tableContainer.innerHTML = '<p class="text-red-500 text-center">Failed to fetch data.</p>';
+            }
+        });
+    });
+</script>
+{% endblock %}

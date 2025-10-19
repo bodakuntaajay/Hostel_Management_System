@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Sahasra Deluxe Stays</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-gray-200 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-sm p-8 bg-white rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Admin Login</h2>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="mb-4 text-red-500 text-center">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        <form action="{{ url_for('login') }}" method="POST">
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700 text-sm font-semibold mb-2">Username</label>
+                <input type="text" id="username" name="username" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="mb-6">
+                <label for="password" class="block text-gray-700 text-sm font-semibold mb-2">Password</label>
+                <input type="password" id="password" name="password" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="flex items-center justify-center">
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-300">
+                    Sign In
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
