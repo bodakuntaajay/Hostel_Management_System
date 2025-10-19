@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash, g,jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database import Base, Block, Room, Bed, Person, Payment, Worker,Admin
+from database import Base, Block, Room, Bed, Person, Payment, Worker,Admin,create_tables
 from config import Config
 from sqlalchemy.exc import IntegrityError
 # Import for initial setup
@@ -36,6 +36,7 @@ def close_db_session(error):
 # --- Initial Admin Setup ---
 # Check and create the initial admin user if the database is empty
 with app.app_context():
+    create_tables()
     Session = DBSession()
     if Session.query(Admin).count() == 0:
         # NOTE: In a production app, use password hashing (e.g., werkzeug.security)
